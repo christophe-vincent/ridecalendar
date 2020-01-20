@@ -1,0 +1,100 @@
+div.rc_date
+{
+   margin: 0;
+   text-align: center;
+   font-weight: bold;
+   font-family: Helvetica,Arial,sans-serif;
+   font-size: 1.2em;
+   padding-left: 0px;
+   color: #3a3aff;
+   margin-bottom: 10px;
+}
+
+div.rc_title
+{
+	margin: 0;
+   text-align: center;
+   font-weight: bold;
+   font-family: Helvetica,Arial,sans-serif;
+   font-size: 1.5em;
+   padding-left: 0px;
+   color: #3a3aff;
+   margin-bottom: 10px;
+}	
+
+table.ridetable {
+    border-width:0px;
+    border-style:solid;
+    border-collapse: collapse;
+    text-align: center;
+ }
+
+ table.ridetable th {
+    border-width:1px;
+    border-style:solid;
+    background-color: #DDDDDD;
+ }
+ table.ridetable td {
+    border-width:1px;
+    border-style:solid;
+ }
+ 
+ table.ridetable th.emptycell {
+    border-width:0px;
+    border-style:none;
+    background-color: #FFFFFF;
+ }
+
+table.ridetable th.name {
+    border-width:1px;
+    border-style:solid;
+    text-align: left;
+    background-color: #EEEEEE;
+ }
+
+div.rc_modifychoice {
+   text-align: right;
+   font-size: 0.8em;
+   color: #555555;
+}
+
+
+.rcc_pseudo
+{
+	margin: 0;
+   font-weight: normal;
+   font-family: Helvetica,Arial,sans-serif;
+   font-size: 0.8em;
+   padding-left: 0px;
+   color: #3a3a3FF;
+   margin-bottom: 10px;
+   text-align: left;
+}
+
+.rcc_date
+{
+	margin: 0;
+   font-weight: normal;
+   font-family: Helvetica,Arial,sans-serif;
+   font-size: 0.7em;
+   padding-left: 0px;
+   color: #FF6a6a;
+   margin-bottom: 10px;
+   text-align: left;
+}
+
+table.rcc_comment 
+{
+	border-width:0px;
+    border-style:solid;
+    border-top:hidden;
+	border-right:hidden;
+    border-left:hidden;
+    border-color:#dddddd;
+    margin-bottom: 5px;	
+}
+
+table.rcc_comment tr.rcc_header
+{
+	background-color: #efefef;
+}
