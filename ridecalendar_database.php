@@ -1,28 +1,43 @@
 <?php
-
 // Database connection
 global $debug;
 global $databasesrv;
 global $databaselogin;
 global $dbpwd;
-
-$debug = 0;
+global $pdo;
+$debug = 1;
 
 include 'config.php';
 
 if ($debug == 1) "POST : ".print_r($_POST)."<br>";
 
-//$connection = mysql_connect("mysql51-57.perso","vttcanalriders","ctciODpb");
+global $db_host;
+global $db_name;
+global $db_user;
+global $db_pass;
+global $pdo;
+$charset = 'utf8';
 
-$connection = mysql_connect($databasesrv, $databaselogin, $dbpwd);
-if ( ! $connection ) 
-die ("Problèmes de connexion à la base de données"); 
-
+$dsn = "mysql:host=$db_host;dbname=$db_name;charset=$charset";
+$options = [
+    PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+    PDO::ATTR_EMULATE_PREPARES   => false,
+];
+try {
+   echo "SET PDO";
+   $pdo = new PDO($dsn, $db_user, $db_pass, $options);
+   echo "connection done";
+} catch (PDOException $e) {
+     echo "Exception";
+     die($e->getMessage());
+}
 
 function TableCreation()
 {
-   echo "Creationde la table...<br>";
-   $query = "CREATE TABLE `vttcanalriders`.`ridecal_proposals` (
+   global $pdo;
+   echo "Creation de la table...<br>";
+   $query = "CREATE TABLE `ridecal_proposals` (
    `id_proposal` INT NOT NULL AUTO_INCREMENT,
    `id_events` INT NOT NULL ,
    `name` TEXT NOT NULL ,
@@ -30,16 +45,14 @@ function TableCreation()
    `def_proposal` TEXT NOT NULL ,
    `comment` TEXT NOT NULL ,
    PRIMARY KEY ( `id_proposal` )
-   ) ENGINE = MYISAM";
-   $result = mysql_query($query);
-   if (!$result) 
-   {
-      $message  = 'Requête invalide : ' . mysql_error() . "\n";
-      $message .= 'Requête complète : ' . $query;
-      die($message);
+   )";
+   try {
+      $pdo->query($query);
+   } catch (PDOException $e) {
+      echo "Impossible de créer une table...";
    }    
    
-   $query = "CREATE TABLE `vttcanalriders`.`ridecal_events` (
+   $query = "CREATE TABLE `ridecal_events` (
    `id_events` INT NOT NULL AUTO_INCREMENT,
    `date` DATE NOT NULL ,
    `title` TEXT NOT NULL ,
@@ -47,42 +60,36 @@ function TableCreation()
    `proposals` TEXT NOT NULL ,
    `add_default` BOOLEAN NOT NULL, 
    PRIMARY KEY ( `id_events` )
-   ) ENGINE = MYISAM" ;
-   $result = mysql_query($query);
-   if (!$result) 
-   {
-      $message  = 'Requête invalide : ' . mysql_error() . "\n";
-      $message .= 'Requête complète : ' . $query;
-      die($message);
+   )" ;
+   try {
+      $pdo->query($query);
+   } catch (PDOException $e) {
+      echo "Impossible de créer une table...";
    }
    
-   $query = "CREATE TABLE `vttcanalriders`.`ridecal_default` (
+   $query = "CREATE TABLE `ridecal_default` (
    `id_default` INT NOT NULL AUTO_INCREMENT,
    `proposal` TEXT NOT NULL ,
    PRIMARY KEY ( `id_default` )
-   ) ENGINE = MYISAM" ;
-   $result = mysql_query($query);
-   if (!$result) 
-   {
-      $message  = 'Requête invalide : ' . mysql_error() . "\n";
-      $message .= 'Requête complète : ' . $query;
-      die($message);
+   )" ;
+   try {
+      $pdo->query($query);
+   } catch (PDOException $e) {
+      echo "Impossible de créer une table...";
    }
    
-   $query = "CREATE TABLE `vttcanalriders`.`ridecal_comments` (
+   $query = "CREATE TABLE `ridecal_comments` (
    `id_comment` INT NOT NULL AUTO_INCREMENT,
    `id_events` INT NOT NULL ,
    `date` DATETIME NOT NULL ,
    `pseudo` TEXT NOT NULL ,
    `comment` TEXT NOT NULL ,
    PRIMARY KEY ( `id_comment` )
-   ) ENGINE = MYISAM" ;
-   $result = mysql_query($query);
-   if (!$result) 
-   {
-      $message  = 'Requête invalide : ' . mysql_error() . "\n";
-      $message .= 'Requête complète : ' . $query;
-      die($message);
+   )" ;
+   try {
+      $pdo->query($query);
+   } catch (PDOException $e) {
+      echo "Impossible de créer une table...";
    }
    
 }
@@ -90,25 +97,45 @@ function TableCreation()
 
 function &GetDefaultProposals()
 {
-   global $connection;
-   $defaults = array("", "", "");
-   $q = mysql_query("SELECT * FROM ridecal_default");
-   if (!mysql_errno($connection))
-   {  
-      if ($r = mysql_fetch_array($q))
-      {
-         $defaults[0] = $r['proposal'];
-      }
-      if ($r = mysql_fetch_array($q))
-      {
-         $defaults[1] = $r['proposal'];
-      }
-      if ($r = mysql_fetch_array($q))
-      {
-         $defaults[2] = $r['proposal'];
-      }
+   global $pdo;
+   try {
+       $q = $pdo->query("SELECT * FROM ridecal_default");
+   } catch (PDOException $e) {
+      TableCreation();
+      die("Initialization de la database effectuée");       
    }
+     
+   $r = $q->fetch();
+   
+   $defaults = explode('@', $r['proposal']);
+   echo "<br>";
+   print_r($defaults);
    return $defaults;
+}
+
+function WriteDefaultProposals($values)
+{
+    global $pdo;
+    $value = implode("@", $values);
+    echo "write<br>";
+    
+    $query = "DELETE FROM `ridecal_default`";
+    try {
+        $pdo->query($query);
+    } catch (PDOException $e) {
+        echo "Erreur base de données...";
+        die();
+    }
+
+    $query = "INSERT INTO ridecal_default (proposal) VALUES ";
+    $query .= "('". $value ."');";
+    try {
+        echo "Query : ".$query;
+        $pdo->query($query);
+    } catch (Exception $e) {
+        echo "Erreur base de données...";
+        die();
+    }
 }
 
 function &GetNextRide()
